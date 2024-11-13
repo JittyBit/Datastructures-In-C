@@ -171,13 +171,13 @@ static void inline __swap(void** a, void** b) {
 }
 
 static int __part(void** list, int len) {
-  int p = len; // last num is pivot 
+  int p = len-1; 
   int i = 0;
-  int j = len-1;
+  int j = p-1;
   while (1) {
-    for (; list[i] <= list[p]; i++);
-    for (; list[j] >= list[p]; j--);
-    if (i > j) break;
+    for (; list[i] <= list[p] && i < p; i++);
+    for (; list[j] >= list[p] && j > 0; j--);
+    if (i >= j) break;
     __swap(list+i, list+j);
   }
   __swap(list+i,list+p);
@@ -188,7 +188,7 @@ static void __qsort(void** list, int len) {
   if (len < 2) return;
   int pivot = __part(list, len);
   
-  __qsort(list, pivot-1);
+  __qsort(list, pivot);
   __qsort(list+pivot+1, len-pivot-1);
 }
 
