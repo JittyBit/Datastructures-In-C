@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-
+#include <stdio.h>
 
 // dbj hashing algorithm
 // http://www.cse.yorku.ca/~oz/hash.html
@@ -31,11 +31,20 @@ Hashmap* NewHashmap() {
   return map;
 }
 
+//IMPORTANT: expects the user to have heap allocated the
+//           hashmap and the underlying array.
+void HashmapFree(Hashmap* map) {
+  if (!map) return;
+  if (!map->arr) return;
+  free(map->arr);
+  free(map);
+}
+
 bool HashmapInsert(Hashmap* map, char* key, void* value) {
   if (!key) return false;
   if (!value) return false; 
 
-  HashEntry entry;
+  HashEntry* entry;
   HashEntry ext = { 
     .hash = map->hash(key), 
     .data = value,
@@ -45,13 +54,9 @@ bool HashmapInsert(Hashmap* map, char* key, void* value) {
   int index = __toIndex(ext.hash, map->cap);
   
   for (int i = 0; i < map->cap; ++i, ext.psl++) {
-    entry = map->arr[(index+i) % map->cap];
-    // if empty, insert 
-    // else, if psl > entry psl
-    //    swap held entry with array entry
-    //    psl = new entry psl
-    if (!entry.data) {
-      memcpy(&entry, &ext, sizeof(HashEntry));
+    entry = map->arr + ((index+i) % map->cap);
+    if (!entry->data) {
+      memcpy(entry, &ext, sizeof(HashEntry));
       map->load++;
       if (map->load > (int) ((float) map->cap)*HASHMAP_LOAD_FACTOR) {
         //TODO: check if resize needed
@@ -59,9 +64,9 @@ bool HashmapInsert(Hashmap* map, char* key, void* value) {
       return true;
     }
 
-    if (ext.psl > entry.psl) {
-      memcpy(&baz, &entry, sizeof(HashEntry));
-      memcpy(&entry, &ext, sizeof(HashEntry));
+    if (ext.psl > entry->psl) {
+      memcpy(&baz, entry, sizeof(HashEntry));
+      memcpy(entry, &ext, sizeof(HashEntry));
       memcpy(&ext, &baz, sizeof(HashEntry));
     }
   }
@@ -74,13 +79,13 @@ void* HashmapIndex(Hashmap* map, char* key, void* value) {
   return map->arr[__toIndex(map->hash(key), map->cap)].data;
 }
 
+//TODO: finish this code
 void* HashmapRemove(Hashmap* map, char* key) {
   if (!map) return NULL;
   if (!key) return NULL;
   
   int idx = __toIndex(map->hash(key), map->cap);
   void* ptr = map->arr[idx].data;
-  //map->arr[idx] = NULL;
   memset(map->arr+idx, 0, sizeof(HashEntry));
   // shift up
   return ptr;

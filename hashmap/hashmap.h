@@ -7,7 +7,7 @@
 
 #ifndef HASHMAP_LOAD_FACTOR
 #define HASHMAP_LOAD_FACTOR 0.75
-#endif // !HASHMAP_LOAD_FACTOR
+#endif
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -27,9 +27,13 @@ typedef struct {
   HashEntry* arr;
 } Hashmap;
 
+//TODO: create HashmapInit for initializing stack-allocated hashmaps
 Hashmap* NewHashmap();
+
 bool HashmapInsert(Hashmap* map, char* key, void* value); 
 void* HashmapRemove(Hashmap* map, char* key);
 bool HashmapReplace(Hashmap* map, char* key, void* value); 
+
+void HashmapFree(Hashmap* map);
 
 #endif
