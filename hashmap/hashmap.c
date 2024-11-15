@@ -40,6 +40,7 @@ void HashmapFree(Hashmap* map) {
   free(map);
 }
 
+//TODO: implement automatic hashmap resizing
 bool HashmapInsert(Hashmap* map, char* key, void* value) {
   if (!key) return false;
   if (!value) return false; 
@@ -53,7 +54,7 @@ bool HashmapInsert(Hashmap* map, char* key, void* value) {
   HashEntry baz = { 0 };
   int index = __toIndex(ext.hash, map->cap);
   
-  for (int i = 0; i < map->cap; ++i, ext.psl++) {
+  for (int i = 0; i < map->cap; ++i, ++ext.psl) {
     entry = map->arr + ((index+i) % map->cap);
     if (!entry->data) {
       memcpy(entry, &ext, sizeof(HashEntry));
@@ -74,12 +75,13 @@ bool HashmapInsert(Hashmap* map, char* key, void* value) {
   return false;
 }
 
-// seems kinda unsafe ngl
+// havent tested edge cases
+// could segfault
 void* HashmapIndex(Hashmap* map, char* key, void* value) {
   return map->arr[__toIndex(map->hash(key), map->cap)].data;
 }
 
-//TODO: finish this code
+// should be finished?
 void* HashmapRemove(Hashmap* map, char* key) {
   if (!map) return NULL;
   if (!key) return NULL;
@@ -87,7 +89,13 @@ void* HashmapRemove(Hashmap* map, char* key) {
   int idx = __toIndex(map->hash(key), map->cap);
   void* ptr = map->arr[idx].data;
   memset(map->arr+idx, 0, sizeof(HashEntry));
-  // shift up
+
+  unsigned long index;
+  for (int i = 0; map->arr[index = ((idx+i) % map->cap)].psl > 0; ++i) {
+    ((HashEntry*) memcpy(map->arr+index-1,map->arr+index,sizeof(HashEntry)))->psl--;
+    memset(map->arr+index,0,sizeof(HashEntry));
+  }
+
   return ptr;
 }
 
