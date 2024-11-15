@@ -58,10 +58,10 @@ bool HashmapInsert(Hashmap* map, char* key, void* value) {
     entry = map->arr + ((index+i) % map->cap);
     if (!entry->data) {
       memcpy(entry, &ext, sizeof(HashEntry));
-      map->load++;
-      if (map->load > (int) ((float) map->cap)*HASHMAP_LOAD_FACTOR) {
-        //TODO: check if resize needed
-      }
+      map->load++; 
+      //TODO: check if resize needed
+      //if (map->load > (int) ((float) map->cap)*HASHMAP_LOAD_FACTOR) {
+      //}
       return true;
     }
 
@@ -72,6 +72,7 @@ bool HashmapInsert(Hashmap* map, char* key, void* value) {
     }
   }
   // if no insert occured, return false
+  // TODO: attempt resize and rerun insert?
   return false;
 }
 
