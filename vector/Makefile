@@ -1,7 +1,7 @@
 .PHONY: clean
 
-main: main.o vector.o
-	gcc -o main main.o vector.o
+build: main.o vector.o
+	gcc -o build main.o vector.o
 
 main.o: main.c 
 	gcc -c main.c 

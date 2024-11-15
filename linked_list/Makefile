@@ -1,7 +1,7 @@
 .PHONY: clean
 
-main: main.o linked_list.o
-	gcc -o main main.o linked_list.o
+build: main.o linked_list.o
+	gcc -o build main.o linked_list.o
 
 main.o: main.c 
 	gcc -c main.c 

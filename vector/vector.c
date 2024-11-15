@@ -25,8 +25,6 @@ Vector* VectorInit(int cap){
     return NULL;
   if (cap < 0)
     return NULL;
-  if (elem_size < 1)
-    return NULL;
   vec->len = 0;
   vec->cap = cap;
   void** buffer = (void**) malloc(sizeof(void*)*cap);
