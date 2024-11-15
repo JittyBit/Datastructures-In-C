@@ -13,6 +13,7 @@
 #include <stdint.h>
 
 #define uint64_t unsigned long
+#define uint32_t unsigned int
 
 typedef struct {  
   uint64_t hash; 

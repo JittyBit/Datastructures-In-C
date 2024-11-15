@@ -75,10 +75,18 @@ bool HashmapInsert(Hashmap* map, char* key, void* value) {
   return false;
 }
 
-// havent tested edge cases
-// could segfault
-void* HashmapIndex(Hashmap* map, char* key, void* value) {
-  return map->arr[__toIndex(map->hash(key), map->cap)].data;
+// should account for hash collisions now
+void* HashmapIndex(Hashmap* map, char* key) {
+  if (!map) return NULL;
+  if (!key) return NULL;
+
+  uint64_t hash = map->hash(key);
+  int idx = __toIndex(hash, map->cap);
+  for (int i = 0; i < map->cap; ++i, ++idx) {
+    if (map->arr[idx % map->cap].hash == hash)
+      return map->arr[idx % map->cap].data; 
+  }
+  return NULL;
 }
 
 // should be finished?
@@ -86,12 +94,18 @@ void* HashmapRemove(Hashmap* map, char* key) {
   if (!map) return NULL;
   if (!key) return NULL;
   
-  int idx = __toIndex(map->hash(key), map->cap);
+  uint64_t hash = map->hash(key);
+  int idx = __toIndex(hash, map->cap);
+  for (int i = 0; i < map->cap; ++i, ++idx) {
+    if (map->arr[idx % map->cap].hash == hash)
+      break;
+  }  
+
   void* ptr = map->arr[idx].data;
   memset(map->arr+idx, 0, sizeof(HashEntry));
 
-  unsigned long index;
-  for (int i = 0; map->arr[index = ((idx+i) % map->cap)].psl > 0; ++i) {
+  //unsigned long index;
+  for (uint32_t i = 0, index = 0; map->arr[index = ((idx+i) % map->cap)].psl > 0; ++i) {
     ((HashEntry*) memcpy(map->arr+index-1,map->arr+index,sizeof(HashEntry)))->psl--;
     memset(map->arr+index,0,sizeof(HashEntry));
   }
@@ -100,6 +114,17 @@ void* HashmapRemove(Hashmap* map, char* key) {
 }
 
 bool HashmapReplace(Hashmap* map, char* key, void* value) {
-  //FIXME: IMPLEMENT THIS
+  if (!map) return false;
+  if (!key) return false;
+  if (!value) return false;
+
+  uint64_t hash = map->hash(key);
+  int idx = __toIndex(hash, map->cap);
+  for (int i = 0; i < map->cap; ++i, ++idx) {
+    if (map->arr[idx % map->cap].hash == hash) {
+      map->arr[idx % map->cap].data = value;
+      return true;
+    }
+  }
   return false;
 }
